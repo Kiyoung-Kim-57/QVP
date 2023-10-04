@@ -4,16 +4,29 @@ using UnityEngine;
 
 public class Orbit : MonoBehaviour
 {
+    public Player player;
     public Transform target;
     public float orbitSpeed;
     Vector3 offset;
-    // Start is called before the first frame update
+
+    public void GetGrenade()
+    {
+        player.grenades[player.hasGrenade].SetActive(true);
+        player.hasGrenade += 1;
+        if (player.hasGrenade > player.maxAmmo)
+            player.hasGrenade = player.maxAmmo;
+        //grenades[hasGrenade].SetActive(true);
+        //hasGrenade += 1;
+        //if (hasGrenade > maxAmmo)
+        //    hasGrenade = maxAmmo;
+    }
+
     void Start()
     {
         offset = transform.position - target.position;
     }
 
-    // Update is called once per frame
+    
     void Update()
     {
         transform.position = target.position + offset;
@@ -22,4 +35,6 @@ public class Orbit : MonoBehaviour
                                orbitSpeed * Time.deltaTime);
         offset = transform.position - target.position;
     }
+
+    
 }

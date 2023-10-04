@@ -4,14 +4,16 @@ using UnityEngine;
 
 public class Weapon : MonoBehaviour
 {
-    public enum Type { Melee, Range };
+    public enum Type { Melee, Range, Gas };
     public Type type;
     public int damage;
     public int maxAmmo;
     public int currentAmmo;
     public float rate;
     public float reloadDelay;
-    
+
+
+    public ParticleSystem particle;
     public BoxCollider meleeArea;
     public TrailRenderer trailEffect;
     public Transform bulletPosition;
@@ -32,6 +34,13 @@ public class Weapon : MonoBehaviour
             currentAmmo--;
             StartCoroutine("Shot");
         }
+        else if (type == Type.Gas && currentAmmo > 0)
+        {
+            currentAmmo--;
+            //Debug.Log("Fire emission");
+            //StopCoroutine("Fire");
+            StartCoroutine("Fire");
+        }
     }
 
     
@@ -44,13 +53,13 @@ public class Weapon : MonoBehaviour
         trailEffect.enabled = true;
         Debug.Log("TrailEffect Enabled");
         //2
-        yield return new WaitForSeconds(0.3f); //1프레임 대기
+        yield return new WaitForSeconds(0.5f); //1프레임 대기
         meleeArea.enabled = false;
 
-        yield return new WaitForSeconds(0.3f);
+        //yield return new WaitForSeconds(0.3f);
         trailEffect.enabled = false;
         trailEffect.Clear();
-        Debug.Log("TrailEffect Disabled");
+        //Debug.Log("TrailEffect Disabled");
 
     }
 
@@ -69,5 +78,15 @@ public class Weapon : MonoBehaviour
         caseRigid.AddTorque(Vector3.up * 10, ForceMode.Impulse);
     }
 
+    IEnumerator Fire()
+    {
+        particle.Play();
+        
+        yield return new WaitForSeconds(0.5f);
+        particle.Stop();
+    }
+
     
 }
+
+

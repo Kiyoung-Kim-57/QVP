@@ -9,6 +9,8 @@ public class Player : MonoBehaviour
     public bool[] hasWeapons;
     public GameObject[] grenades;
     public int hasGrenade;
+    public Camera followCamera;
+    
 
     float hAxis;
     float vAxis;
@@ -31,18 +33,20 @@ public class Player : MonoBehaviour
     bool iDown;
     bool sDown1;
     bool sDown2;
+    bool sDown3;
     bool fDown;
     bool rDown;
     bool isSwap;
     bool isFireReady;
     bool isBulletPresent;
     bool isReloadDone;
+    bool isFireGas;
     
     
 
     Animator anim;
     GameObject nearObject;
-    Weapon equipWeapon;
+    public Weapon equipWeapon;
 
     Vector3 moveVec;
     
@@ -61,9 +65,27 @@ public class Player : MonoBehaviour
         Move();
         Attack();
         Swap();
+        Turn();
         Reload();
         
 
+    }
+
+    void Turn()
+    {
+        transform.LookAt(transform.position + moveVec);
+
+        if (fDown)
+        {
+            Ray ray = followCamera.ScreenPointToRay(Input.mousePosition);
+            RaycastHit rayHit;
+            if (Physics.Raycast(ray, out rayHit, 100))
+            {
+                Vector3 nextVec = rayHit.point;
+                nextVec.y = 0;
+                transform.LookAt(nextVec);
+            }
+        }  
     }
 
     void Swap()
@@ -71,7 +93,7 @@ public class Player : MonoBehaviour
         int weaponIndex = -1;
         if (sDown1) weaponIndex = 0;
         if (sDown2) weaponIndex = 1;
-        //if (sDown3) weaponIndex = 2;
+        if (sDown3) weaponIndex = 2;
 
         if (sDown1 || sDown2)
         {
@@ -129,8 +151,6 @@ public class Player : MonoBehaviour
         }
     }
 
-
-
     void GetInput()
     {
 
@@ -138,12 +158,13 @@ public class Player : MonoBehaviour
         vAxis = Input.GetAxisRaw("Vertical");
         wDown = Input.GetButton("Walk");
         iDown = Input.GetButtonDown("Interaction");
-        fDown = Input.GetButtonDown("Fire1");
+        fDown = Input.GetButton("Fire1");
         rDown = Input.GetButtonDown("Reload");
 
 
         sDown1 = Input.GetButtonDown("Swap1");
         sDown2 = Input.GetButtonDown("Swap2");
+        sDown3 = Input.GetButtonDown("Swap3");
         //sDown3 = Input.GetButtonDown("Swap3");
     }
 
@@ -152,6 +173,7 @@ public class Player : MonoBehaviour
         if (equipWeapon == null)
             return;
 
+        
         fireDelay += Time.deltaTime;
         reloadDelay += Time.deltaTime;
         isFireReady = equipWeapon.rate < fireDelay;
@@ -168,6 +190,11 @@ public class Player : MonoBehaviour
             }
             else if(equipWeapon.type == Weapon.Type.Range && isBulletPresent)
             {
+                anim.SetTrigger("doShot");
+            }
+            else if(equipWeapon.type == Weapon.Type.Gas && isBulletPresent)
+            {
+                
                 anim.SetTrigger("doShot");
             }
      
@@ -194,6 +221,8 @@ public class Player : MonoBehaviour
             reloadDelay = 0;
         }
     }
+
+   
 
     private void OnTriggerStay(Collider other)
     {
